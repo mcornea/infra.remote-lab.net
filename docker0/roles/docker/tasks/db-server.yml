@@ -1,0 +1,12 @@
+- name: create db container
+  docker:
+    name: db-server
+    image: mysql:latest
+    state: started
+    pull: always
+    ports:
+    - "127.0.0.1:3306:3306"
+    volumes:
+    - /home/{{ local_username.stdout }}/containers/db-server:/var/lib/mysql
+    env:
+        MYSQL_ROOT_PASSWORD: "{{mysql_pass }}"

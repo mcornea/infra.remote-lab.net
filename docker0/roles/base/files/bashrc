@@ -1,0 +1,18 @@
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
+alias ls="ls --color=auto"
+alias ll='ls -alF'
+alias l='ls -CF'
+
+PS1='\[\033[32m\]\u@\h\[\033[02m\]:\[\033[36m\]\w\[\033[37m\] # '

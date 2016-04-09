@@ -1,0 +1,10 @@
+- name: create containers dirs
+  file: path={{ item }} state=directory
+  with_items:
+    - ~/containers/webnode
+    - ~/containers/db-server
+    - ~/tools
+
+- include: db-server.yml
+
+- include: loadbalancer.yml

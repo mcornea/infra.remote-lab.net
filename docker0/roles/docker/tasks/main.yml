@@ -1,0 +1,27 @@
+---
+- name: enable docker repo
+  copy: src=docker.repo dest=/etc/yum.repos.d/docker.repo
+
+- name: install docker
+  yum: name={{ item }} state=installed
+  with_items:
+  - docker-python
+  - docker-engine
+
+- name: start and enable docker
+  service: name=docker state=started enabled=yes
+
+- name: add docker group
+  group: name=docker state=present
+
+- name: regiser username 
+  command: whoami
+  register: local_username
+  sudo: no
+
+- name: add user to docker group
+  user: name={{ local_username.stdout }} groups=docker append=yes
+
+- name: include containers
+  include: containers.yml
+  sudo: no

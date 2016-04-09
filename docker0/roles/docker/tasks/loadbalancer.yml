@@ -1,0 +1,16 @@
+- name: clone nginx-proxy repo
+  git: repo=https://github.com/jwilder/nginx-proxy.git
+       dest=/home/{{ local_username.stdout }}/tools/nginx-proxy
+
+- name: build loadbalancer image
+  command: docker build -t loadbalancer /home/{{ local_username.stdout }}/tools/nginx-proxy
+
+- name: create loadbalancer container
+  docker:
+    name: loadbalancer
+    image: loadbalancer:latest
+    state: started
+    ports:
+    - "80:80"
+    volumes:
+    - /var/run/docker.sock:/tmp/docker.sock

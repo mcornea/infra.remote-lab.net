@@ -1,0 +1,50 @@
+---
+- name: set hostname
+  hostname: name=docker0.remote-lab.net
+
+- name: install packages
+  yum: name={{ item }} state=installed
+  with_items:
+    - vim
+    - atop
+    - openvpn
+    - git
+    - yum-cron
+    - postfix
+    - tmux
+    - sysstat
+
+- name: set up bashrc
+  copy: src=bashrc dest='~/.bashrc'
+  sudo: no
+
+- name: set up vimrc
+  copy: src=vimrc dest='~/.vimrc'
+  sudo: no
+
+- name: set apply_updates 
+  lineinfile: dest=/etc/yum/yum-cron.conf regexp=^apply_updates line='apply_updates = yes'
+  notify: restart yum-cron
+
+- name: set system_name
+  lineinfile: dest=/etc/yum/yum-cron.conf regexp=^system_name line='system_name = docker0.remote-lab.net'
+  notify: restart yum-cron
+
+- name: set emit_via 
+  lineinfile: dest=/etc/yum/yum-cron.conf regexp=^emit_via line='emit_via = email'
+  notify: restart yum-cron
+
+- name: set emit_via 
+  lineinfile: dest=/etc/yum/yum-cron.conf regexp=^emit_via line='emit_via = email'
+  notify: restart yum-cron
+
+- name: set email_from
+  lineinfile: dest=/etc/yum/yum-cron.conf regexp=^email_from line='email_from = root@docker0.remote-lab.net'
+  notify: restart yum-cron
+
+- name: enable yum-cron
+  service: name=yum-cron state=started enabled=yes
+
+- name: set aliases
+  lineinfile: 'dest=/etc/aliases regexp=^root line="root:      marius@remote-lab.net"'
+  notify: run newaliases
