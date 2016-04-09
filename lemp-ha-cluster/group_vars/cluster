@@ -1,0 +1,31 @@
+---
+lb:
+  public_vip: 192.168.0.200
+  internal_vip: 10.0.10.200
+  auth: parola
+
+db:
+  root_pass: "parola1"
+  repl_pass: "parola2" 
+
+fw:
+  rules:
+   - action: "ACCEPT"
+     src: "net"
+     proto: "icmp"
+     comment: "public icmp"
+   - action: "ACCEPT"
+     src: "net:192.168.0.19"
+     proto: "tcp"
+     port: 22
+     comment: "admin node SSH"
+   - action: "ACCEPT"
+     src: "net"
+     proto: "tcp"
+     port: 1993
+     comment: "haproxy admin"
+   - action: "ACCEPT"
+     src: "net"
+     proto: "tcp"
+     port: 80
+     comment: "http"

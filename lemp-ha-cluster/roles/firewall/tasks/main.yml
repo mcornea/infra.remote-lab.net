@@ -1,0 +1,26 @@
+---
+- name: install shorewall
+  yum: name=shorewall state=installed
+
+- name: enable shorewall startup 
+  lineinfile: dest=/etc/shorewall/shorewall.conf regexp=^STARTUP_ENABLED= line=STARTUP_ENABLED=Yes
+
+- name: create zones file
+  copy: src=zones dest=/etc/shorewall/zones
+
+- name: create interfaces file
+  copy: src=interfaces dest=/etc/shorewall/interfaces
+
+- name: create policy file
+  copy: src=policy dest=/etc/shorewall/policy
+
+- name: create stoppedrules file
+  copy: src=stoppedrules dest=/etc/shorewall/stoppedrules
+
+- name: create rules file
+  template: src=rules.j2 dest='/etc/shorewall/rules'
+  notify: 
+  - restart shorewall
+
+- name: enable shorewall
+  service: name=shorewall state=started enabled=yes

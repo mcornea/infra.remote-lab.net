@@ -1,0 +1,8 @@
+# For information about entries in this file, type "man shorewall-policy"
+###############################################################################
+#SOURCE     DEST        POLICY      LOG LEVEL   LIMIT:BURST
+$FW     all     ACCEPT
+net     all     DROP        
+loc	all	DROP
+# The FOLLOWING POLICY MUST BE LAST
+all     all     REJECT

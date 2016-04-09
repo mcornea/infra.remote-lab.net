@@ -1,0 +1,37 @@
+---
+- name: set up gluster repo
+  get_url: url=http://download.gluster.org/pub/gluster/glusterfs/LATEST/RHEL/glusterfs-epel.repo dest=/etc/yum.repos.d/glusterfs-epel.repo
+
+- name: install gluster
+  yum: name={{ item }} state=installed
+  with_items:
+    - glusterfs-server
+    - glusterfs-client
+
+- name: enable gluster
+  service: name=glusterd state=started enabled=yes
+
+- name: create gluster brick and mount directories
+  file: path={{ item }} state=directory mode=0775
+  with_items:
+    - '/srv/brick'
+    - '/var/www'
+
+- name: create gluster volume
+  gluster_volume:
+    state: present
+    name: 'storage'
+    brick: '/srv/brick'
+    replicas: 3
+    cluster: "{% for node in groups['cluster'] -%}{{ hostvars[node]['ansible_eth1']['ipv4']['address']}}{% if not loop.last %},{% endif %}{%- endfor %}"
+    host: "{{ ansible_eth1.ipv4.address }}"
+    force: yes
+  run_once: true
+
+- name: mount gluster volume
+  mount:
+    name: "/var/www/"
+    src: "{{ ansible_eth1.ipv4.address }}:/storage"
+    fstype: glusterfs
+    opts: "defaults,_netdev"
+    state: mounted

@@ -1,0 +1,10 @@
+[master]
+node01 master=true
+
+[backup]
+node02 secondary=true
+node03 tertiary=true
+
+[cluster:children]
+master
+backup

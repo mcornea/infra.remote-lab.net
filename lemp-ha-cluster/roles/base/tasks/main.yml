@@ -1,0 +1,11 @@
+---
+- name: install packages
+  yum: name={{ item }} state=installed
+  with_items:
+   - epel-release
+   - postfix 
+   - vim
+   - git
+
+- name: set SELinux permissive mode
+  selinux: policy=targeted state=permissive

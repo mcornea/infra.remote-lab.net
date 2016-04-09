@@ -1,0 +1,45 @@
+global
+  daemon  
+  group  haproxy
+  log  /dev/log local0
+  maxconn  20480
+  pidfile  /var/run/haproxy.pid
+  user  haproxy
+
+defaults
+  log  global
+  maxconn  4096
+  mode  tcp
+  retries  3
+  timeout  http-request 10s
+  timeout  queue 1m
+  timeout  connect 10s
+  timeout  client 1m
+  timeout  server 1m
+  timeout  check 10s
+
+listen haproxy.stats
+  bind {{ ansible_eth0.ipv4.address }}:1993 
+  mode http
+  stats enable
+  stats uri /
+
+listen web
+  bind {{ lb.public_vip }}:80 transparent
+  mode http
+  cookie SERVERID insert indirect nocache
+{% for node in groups['cluster'] %}
+  server {{ hostvars[node]["ansible_hostname"] }} {{ hostvars[node]["ansible_eth1"]["ipv4"]["address"] }}:80 check cookie {{ hostvars[node]["ansible_hostname"] }} fall 5 inter 2000 rise 2
+{% endfor %}
+
+listen mysql
+  bind {{ lb.internal_vip }}:3306 transparent
+  option tcpka
+  option httpchk
+  stick on dst
+  stick-table type ip size 1000
+  timeout client 90m
+  timeout server 90m
+{% for node in groups['cluster'] %}
+  server {{ hostvars[node]["ansible_hostname"] }} {{ hostvars[node]["ansible_eth1"]["ipv4"]["address"] }}:3306 backup check fall 5 inter 2000 on-marked-down shutdown-sessions port 9200 rise 2
+{% endfor %}

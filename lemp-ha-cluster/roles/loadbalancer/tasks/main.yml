@@ -1,0 +1,23 @@
+---
+- name: install keepalived + haproxy
+  yum: name={{ item }} state=installed
+  with_items: 
+    - keepalived
+    - haproxy
+
+- name: enable ip_nonlocal_bind
+  sysctl: name="net.ipv4.ip_nonlocal_bind" value=1 sysctl_set=yes state=present reload=yes
+
+- name: set up keepalived configuration file
+  template: src=keepalived.conf.j2 dest=/etc/keepalived/keepalived.conf
+  notify: restart keepalived
+
+- name: enable keepalived
+  service: name=keepalived state=started enabled=yes
+
+- name: set up haproxy configuration file
+  template: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg
+  notify: restart haproxy
+
+- name: enable haproxy
+  service: name=haproxy state=started enabled=yes

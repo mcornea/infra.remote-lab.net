@@ -1,0 +1,46 @@
+vrrp_script chk_haproxy {
+    script "pidof haproxy"
+    interval 2
+}
+
+vrrp_instance public {
+    interface eth1
+{% if master is defined %}
+    state MASTER
+    priority 200
+{% else %}
+    state BACKUP
+    priority 100
+{% endif %}
+
+    virtual_router_id 33
+    unicast_src_ip {{ ansible_eth1.ipv4.address }}
+    unicast_peer {
+{% for node in groups['cluster'] %}
+{% if ansible_eth1.ipv4.address != hostvars[node]["ansible_eth1"]["ipv4"]["address"] %}
+    {{ hostvars[node]["ansible_eth1"]["ipv4"]["address"] }}
+{% endif %}
+{% endfor %}
+    }
+
+    authentication {
+        auth_type PASS
+        auth_pass {{ lb.auth }}
+    }
+
+    virtual_ipaddress {
+        {{ lb.public_vip }}/32 dev eth0
+        {{ lb.internal_vip }}/32 dev eth1
+    }
+
+    track_script {
+        chk_haproxy
+    }
+}
+
+    }
+
+    track_script {
+        chk_haproxy
+    }
+}

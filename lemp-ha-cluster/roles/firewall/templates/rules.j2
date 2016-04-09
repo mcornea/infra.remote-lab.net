@@ -1,0 +1,16 @@
+# For information on entries in this file, type "man shorewall-rules"
+#############################################################################################################
+#ACTION     SOURCE      DEST        PROTO   DEST    SOURCE      ORIGINAL    RATE        USER/   MARK
+#                           PORT    PORT(S)     DEST        LIMIT       GROUP
+
+{% for node in groups['cluster'] %}
+ACCEPT	net:{{ hostvars[node]["ansible_eth0"]["ipv4"]["address"] }}	$FW		# {{ hostvars[node]["ansible_nodename"] }} eth0
+{% endfor %}
+{% for node in groups['cluster'] %}
+ACCEPT	loc:{{ hostvars[node]["ansible_eth1"]["ipv4"]["address"] }}		$FW		# {{ hostvars[node]["ansible_nodename"] }} eth1
+{% endfor %}
+
+{% for rule in fw.rules %}
+{{ rule.action }}	{% if rule.src is defined %}{{ rule.src }}{% else %}-{% endif %}	$FW		{% if rule.proto is defined %}{{ rule.proto }}{% else %}-{% endif %}	{% if rule.port is defined %}{{ rule.port }}{% else %}-{% endif %}	{% if rule.comment is defined %}#{{ rule.comment }}{% else %}# -{% endif %}
+#
+{% endfor %}

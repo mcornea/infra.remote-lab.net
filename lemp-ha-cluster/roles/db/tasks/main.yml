@@ -1,0 +1,142 @@
+---
+- name: add MariaDB repo
+  copy: src=mariadb.repo dest=/etc/yum.repos.d/mariadb.repo
+
+- name: install packages
+  yum: name={{ item }} state=installed
+  with_items:
+    - socat
+    - MySQL-python
+    - MariaDB-server
+    - MariaDB-client
+    - rsync
+    - galera
+    - xinetd
+
+- name: bind on the internal ip
+  lineinfile: dest=/etc/my.cnf.d/server.cnf regexp=^bind-address= line=bind-address={{ ansible_eth1.ipv4.address }}
+
+- name: start mysql on master
+  service: name=mysql state=started enabled=yes 
+  when: master is defined 
+
+- name: change mysql root password
+  mysql_user:
+    name: root 
+    host: "{{ item }}" 
+    password: "{{ db.root_pass }}"
+    login_user: root
+    login_password: "{{ db.root_pass }}"
+    check_implicit_admin: yes
+    priv: "*.*:ALL,GRANT"
+  with_items:
+    - "{{ ansible_eth1.ipv4.address }}"
+    - 127.0.0.1
+    - ::1
+    - localhost 
+  when: master is defined 
+
+- name: set up .my.cnf
+  template: src=my.cnf.j2 dest='~/.my.cnf' 
+
+- name: delete non existing mysql user
+  mysql_user: name='' state=absent
+  when: master is defined 
+
+- name: delete anonymous MySQL server user for {{ ansible_hostname }}
+  mysql_user: user="" host="{{ ansible_hostname }}" state="absent"
+  when: master is defined 
+ 
+- name: remove the MySQL test database
+  mysql_db:
+    db: test 
+    state: absent
+    login_user: root
+    login_password: "{{ db.root_pass }}"
+  when: master is defined 
+
+- name: create replication user
+  mysql_user: name=sst_user password={{ db.repl_pass }} priv=*.*:ALL state=present
+  when: master is defined 
+
+- name: check cluster status
+  shell: mysql -e "show status like 'wsrep_local_state_comment'" | grep wsrep_local_state_comment | awk {'print $2'} | grep Synced
+  register: status
+  ignore_errors: true
+
+- name: stop mysql service
+  service: name=mysql state=stopped
+  when:  status|failed
+
+- name: generate cluster config
+  template: src=server.cnf.j2 dest=/etc/my.cnf.d/server.cnf
+  register: conf
+
+- name: restart secondary
+  service: name=mariadb state=restarted
+  when: conf.changed and secondary is defined and not status|failed
+ 
+- name: wait for secondary to recover
+  shell: /bin/clustercheck | grep HTTP
+  register: log_output
+  until: log_output.stdout.find("200") > -1
+  retries: 10
+  delay: 3
+  when: secondary is defined and not status|failed
+
+- name: restart tertiary
+  service: name=mariadb state=restarted
+  when: conf.changed and tertiary is defined and not status|failed
+ 
+- name: wait for tertiary to recover
+  shell: /bin/clustercheck | grep HTTP
+  register: log_output
+  until: log_output.stdout.find("200") > -1
+  retries: 10
+  delay: 3
+  when: tertiary is defined and not status|failed
+
+- name: restart master
+  service: name=mariadb state=restarted
+  when: conf.changed and master is defined and not status|failed
+
+- name: wait for master to recover
+  shell: /bin/clustercheck | grep HTTP
+  register: log_output
+  until: log_output.stdout.find("200") > -1
+  retries: 10
+  delay: 3
+  when: master is defined and not status|failed
+
+- name: bootstrap node
+  shell: '/usr/bin/galera_new_cluster'
+  when: master is defined and status|failed
+
+- name: start mysql on backup nodes
+  service: name=mysql state=started
+  when: master is not defined
+
+- name: create clustercheck
+  copy: src=clustercheck dest=/usr/bin/clustercheck mode="755"
+
+- name: create clustercheck
+  template: src=clustercheck_sysconfig dest=/etc/sysconfig/clustercheck
+
+- name: create xinetd service for galera monitoring
+  copy: src=galera-monitor dest=/etc/xinetd.d/galera-monitor
+  notify: restart xinetd
+
+- name: change mysql root password
+  mysql_user:
+    name: root 
+    host: "{{ item }}" 
+    password: "{{ db.root_pass }}"
+    login_user: root
+    login_password: "{{ db.root_pass }}"
+    check_implicit_admin: yes
+    priv: "*.*:ALL,GRANT"
+  with_items:
+    - "{{ ansible_eth1.ipv4.address }}"
+    - 127.0.0.1
+    - ::1
+    - localhost 

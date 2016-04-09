@@ -1,0 +1,12 @@
+---
+- name: set up cluster configuration
+  hosts: cluster
+  remote_user: centos
+  sudo: yes
+  roles:
+   - base 
+   - firewall
+   - storage
+   - loadbalancer
+   - db
+   - web
