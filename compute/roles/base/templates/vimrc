@@ -1,0 +1,34 @@
+syntax on                       " turn on syntax highlighting
+set background=dark             " colors for black background
+
+set incsearch                   " incremental search
+set showmatch                   " show matching brackets
+
+set title                       " show file in titlebar
+set showcmd                     " show (partial) command
+set ruler                       " show line,column
+
+filetype indent on              " filetype indent (for python for example)
+set autoindent                  " preserve current indent on new lines
+set smartindent                 " smartident
+set backspace=indent,eol,start  " make backspaces delete sensibly
+
+set tabstop=4                   " indentation levels every four columns
+set softtabstop=4               " softtabstop for backspacing 4 spaces (backspace=ident)
+set expandtab                   " convert all tabs to space
+set shiftwidth=4                " indent/outdent by four columns
+set shiftround                  " indent/outdent to nearest tabstops
+
+set wildmenu                    " improved command line completion
+set visualbell                  " visual bell
+
+"set colorcolumn=79
+
+nnoremap <up> <nop>
+nnoremap <down> <nop>
+nnoremap <left> <nop>
+nnoremap <right> <nop>
+inoremap <up> <nop>
+inoremap <down> <nop>
+inoremap <left> <nop>
+inoremap <right> <nop>

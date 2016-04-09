@@ -1,0 +1,10 @@
+---
+- name: Set up base configuration
+  hosts: localhost
+
+  roles:
+    - base
+    - firewall
+    - nfs
+    - openstack
+

@@ -1,0 +1,6 @@
+---
+- name: restart yum-cron
+  service: name=yum-cron state=restarted
+
+- name: run newaliases
+  command: /usr/bin/newaliases

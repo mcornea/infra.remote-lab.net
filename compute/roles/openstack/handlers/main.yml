@@ -1,0 +1,15 @@
+---
+- name: yum update
+  command: yum update -y
+
+- name: restart networking
+  service: name=network.service  state=restarted
+
+- name: restart cinder api
+  service: name=openstack-cinder-api.service state=restarted
+
+- name: restart neutron services
+  service: name={{ item }} state=restarted
+  with_items: 
+    - neutron-server.service
+    - neutron-openvswitch-agent.service

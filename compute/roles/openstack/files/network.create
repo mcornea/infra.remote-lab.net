@@ -1,0 +1,17 @@
+neutron net-create vpn-net --provider:network_type flat  --provider:physical_network external  --router:external --shared
+neutron subnet-create --allocation-pool start=172.16.17.20,end=172.16.17.150 --gateway 172.16.17.1 --enable_dhcp=False vpn-net 172.16.17.0/24
+neutron router-create vpn-router
+neutron router-gateway-set vpn-router vpn-net
+
+neutron net-create internal
+neutron subnet-create internal 192.168.0.0/24 --name internal-subnet --allocation-pool start=192.168.0.10,end=192.168.0.200 --gateway 192.168.0.1 --dns-nameserver 8.8.8.8 --dns-nameserver 8.8.4.4
+neutron router-interface-add vpn-router internal-subnet
+
+for flavor in m1.tiny m1.small m1.medium m1.large m1.xlarge; do nova flavor-delete $flavor;done
+nova flavor-create --swap 2048 v4-8G-40G $(uuidgen -r) 8192 40 4
+nova flavor-create --swap 2048 v1-1G-10G $(uuidgen -r) 1024 10 1
+nova flavor-create --swap 2048 v2-2G-20G $(uuidgen -r) 2048 20 2
+nova flavor-create --swap 2048 v1-0.5G-10G $(uuidgen -r) 512 10 1
+nova flavor-create --swap 2048 v1-2G-20G $(uuidgen -r) 2048 20 1
+nova flavor-create --swap 2048 v1-1G-20G $(uuidgen -r) 1024 20 1
+nova flavor-create --swap 2048 v2-4G-40G $(uuidgen -r) 4096 40 2

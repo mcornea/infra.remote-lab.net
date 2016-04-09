@@ -1,0 +1,33 @@
+---
+- name: install shorewall
+  yum: name=shorewall state=installed 
+
+- name: configure interfaces
+  template: src=interfaces dest='/etc/shorewall/interfaces'
+  notify: restart shorewall
+
+- name: configure rules
+  template: src=rules dest='/etc/shorewall/rules'
+  notify: restart shorewall
+
+- name: configure zones
+  template: src=zones dest='/etc/shorewall/zones'
+  notify: restart shorewall
+
+- name: configure policy
+  template: src=policy dest='/etc/shorewall/policy'
+  notify: restart shorewall
+
+- name: configure stoppedrules
+  template: src=stoppedrules dest='/etc/shorewall/stoppedrules'
+  notify: restart shorewall
+
+- name: configure masq
+  template: src=masq dest='/etc/shorewall/masq'
+  notify: restart shorewall
+
+- name: enable shorewall startup 
+  lineinfile: dest=/etc/shorewall/shorewall.conf regexp=^STARTUP_ENABLED= line=STARTUP_ENABLED=Yes
+
+- name: enable shorewall
+  service: name=shorewall state=started enabled=yes

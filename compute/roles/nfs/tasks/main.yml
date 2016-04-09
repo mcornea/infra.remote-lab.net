@@ -1,0 +1,10 @@
+---
+- name: install nfs-utils
+  yum: name=nfs-utils state=installed
+
+- name: create nfs directory
+  file: path=/srv/nfs mode=0777 state=directory
+
+- name: create exports
+  copy: src=exports dest=/etc/exports
+  notify: restart nfs-server

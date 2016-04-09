@@ -1,0 +1,117 @@
+---
+- name: install rdo-release
+  yum: name=https://rdoproject.org/repos/rdo-release.rpm state=present
+  notify: yum update
+
+- name: install packstack
+  yum: name=openstack-packstack state=installed
+
+- name: check for answer file
+  stat: path=~/answers
+  register: answers
+
+- name: create answer file
+  command: packstack --gen-answer-file=~/answers
+  when: not answers.stat.exists
+
+- name: set hostname 
+  replace: dest=~/answers regexp='(.*)(HOST=.+)' replace='\1HOST=compute.remote-lab.net'
+
+- name: set hostnames
+  replace: dest=~/answers regexp='(.*)(HOSTS=.+)' replace='\1HOSTS=compute.remote-lab.net'
+
+- name: disable ceilometer
+  lineinfile: dest=~/answers regexp=^CONFIG_CEILOMETER_INSTALL line=CONFIG_CEILOMETER_INSTALL=n
+
+- name: enable heat
+  lineinfile: dest=~/answers regexp=^CONFIG_HEAT_INSTALL line=CONFIG_HEAT_INSTALL=y
+
+- name: set ntp servers
+  lineinfile: dest=~/answers regexp=^CONFIG_NTP_SERVERS line=CONFIG_NTP_SERVERS=ntp1.hetzner.de,ntp2.hetzner.com,ntp3.hetzner.net
+
+- name: disable nagios
+  lineinfile: dest=~/answers regexp=^CONFIG_NAGIOS_INSTALL line=CONFIG_NAGIOS_INSTALL=n
+
+- name: set neutron l3 bridge
+  lineinfile: dest=~/answers regexp=^CONFIG_NEUTRON_L3_EXT_BRIDGE line=CONFIG_NEUTRON_L3_EXT_BRIDGE=
+
+- name: set neutron network types
+  lineinfile: dest=~/answers regexp=^CONFIG_NEUTRON_ML2_TYPE_DRIVERS line=CONFIG_NEUTRON_ML2_TYPE_DRIVERS=flat,vlan,vxlan
+
+- name: set neutron bridge mapping
+  lineinfile: dest=~/answers regexp=^CONFIG_NEUTRON_OVS_BRIDGE_MAPPINGS line=CONFIG_NEUTRON_OVS_BRIDGE_MAPPINGS=external:br-ex
+
+- name: enable cinder nfs backend
+  lineinfile: dest=~/answers regexp=^CONFIG_CINDER_BACKEND line=CONFIG_CINDER_BACKEND=nfs
+
+- name: set nfs mount point 
+  lineinfile: dest=~/answers regexp=^CONFIG_CINDER_NFS_MOUNTS line=CONFIG_CINDER_NFS_MOUNTS=178.63.10.10:/srv/nfs
+
+- name: disable cinder vg
+  lineinfile: dest=~/answers regexp=^CONFIG_CINDER_VOLUMES_CREATE line=CONFIG_CINDER_VOLUMES_CREATE=n
+
+- name: disable demo
+  lineinfile: dest=~/answers regexp=^CONFIG_PROVISION_DEMO line=CONFIG_PROVISION_DEMO=n
+
+- name: disable ssl cert generation
+  lineinfile: dest=~/answers regexp=^CONFIG_SSL_CACERT_SELFSIGN line=CONFIG_SSL_CACERT_SELFSIGN=n
+
+- name: enable horizon ssl
+  lineinfile: dest=~/answers regexp=^CONFIG_HORIZON_SSL line=CONFIG_HORIZON_SSL=y
+
+- name: set horizon ssl certificate
+  lineinfile: dest=~/answers regexp=^CONFIG_HORIZON_SSL_CERT line=CONFIG_HORIZON_SSL_CERT=/etc/ssl/horizon/compute.remote-lab.net.crt
+
+- name: set horizon ssl key
+  lineinfile: dest=~/answers regexp=^CONFIG_HORIZON_SSL_KEY line=CONFIG_HORIZON_SSL_KEY=/etc/ssl/horizon/compute.remote-lab.net.key
+
+- name: set horizon ssl ca cert
+  lineinfile: dest=~/answers regexp=^CONFIG_HORIZON_SSL_CACERT line=CONFIG_HORIZON_SSL_CACERT=/etc/ssl/horizon/compute.remote-lab.net.ca.crt
+
+- name: set vnc ssl cert
+  lineinfile: dest=~/answers regexp=^CONFIG_VNC_SSL_CERT line=CONFIG_VNC_SSL_CERT=/etc/ssl/horizon/compute.remote-lab.net.crt
+
+- name: set vnc ssl cert
+  lineinfile: dest=~/answers regexp=^CONFIG_VNC_SSL_KEY line=CONFIG_VNC_SSL_KEY=/etc/ssl/horizon/compute.remote-lab.net.key
+
+- name: create /etc/ssl/horizon/
+  file: path=/etc/ssl/horizon state=directory
+
+- name : create ssl cert
+  template: src=ssl.crt dest=/etc/ssl/horizon/compute.remote-lab.net.crt
+
+- name : create ssl key
+  template: src=ssl.key dest=/etc/ssl/horizon/compute.remote-lab.net.key
+
+- name : create ssl ca cert
+  template: src=ssl.ca.crt dest=/etc/ssl/horizon/compute.remote-lab.net.ca.crt
+
+- name: check for credentials file
+  stat: path=~/keystonerc_admin
+  register: keystonerc
+
+- name: run packstack
+  command: packstack --answer-file=~/answers
+  when: not keystonerc.stat.exists
+
+- name: Create br-ex bridge
+  openvswitch_bridge: bridge=br-ex state=present
+
+- name: Create br-ex ifcfg script
+  copy:  src=ifcfg-br-ex dest=/etc/sysconfig/network-scripts/ifcfg-br-ex
+  notify: restart networking
+
+- name: Create ifcfg-eth0:1 ifcfg script
+  copy:  src=ifcfg-eth0:1 dest=/etc/sysconfig/network-scripts/ifcfg-eth0:1
+  notify: restart networking
+
+- name: Workaround for Horizon error
+  command: crudini --set /etc/cinder/cinder.conf keystone_authtoken auth_uri http://compute.remote-lab.net:5000
+  notify: restart cinder api
+
+- name: Configure NoopFirewallDriver in openvswitch_agent.ini
+  command: crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver 
+  notify: restart neutron services
+
+- name: Create networking commands
+  copy: src=network.create dest=~/network.create
