@@ -2,6 +2,9 @@
   git: repo=https://github.com/jwilder/nginx-proxy.git
        dest=/home/{{ local_username.stdout }}/tools/nginx-proxy
 
+- name: create custom nginx configuration
+  copy: src=my_proxy.conf dest=/home/{{ local_username.stdout }}/tools/nginx-proxy/my_proxy.conf
+
 - name: build loadbalancer image
   command: docker build -t loadbalancer /home/{{ local_username.stdout }}/tools/nginx-proxy
 
@@ -13,4 +16,5 @@
     ports:
     - "80:80"
     volumes:
+    - /home/{{ local_username.stdout }}/tools/nginx-proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro
     - /var/run/docker.sock:/tmp/docker.sock
