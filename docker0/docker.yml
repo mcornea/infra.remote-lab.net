@@ -1,6 +1,6 @@
 ---
 - name: Set up base configuration
-  hosts: localhost
+  hosts: docker0
   sudo: yes
 
   roles:
