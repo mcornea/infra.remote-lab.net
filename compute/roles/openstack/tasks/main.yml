@@ -113,5 +113,9 @@
   command: crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver 
   notify: restart neutron services
 
+- name: Configure prevent_arp_spoofing in openvswitch_agent.ini
+  command: crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent prevent_arp_spoofing False
+  notify: restart neutron services
+
 - name: Create networking commands
   copy: src=network.create dest=~/network.create
