@@ -113,6 +113,10 @@
   command: crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini securitygroup firewall_driver neutron.agent.firewall.NoopFirewallDriver 
   notify: restart neutron services
 
+- name: Configure dhcp_domain in nova.conf
+  command: crudini --set /etc/nova/nova.conf DEFAULT dhcp_domain remote-lab.net
+  notify: restart nova services
+
 - name: Configure prevent_arp_spoofing in openvswitch_agent.ini
   command: crudini --set /etc/neutron/plugins/ml2/openvswitch_agent.ini agent prevent_arp_spoofing False
   notify: restart neutron services
