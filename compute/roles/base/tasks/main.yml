@@ -13,6 +13,7 @@
     - postfix
     - tmux
     - sysstat
+    - cyrus-sasl-plain
 
 - name: set up bashrc
   template: src=bashrc dest='~/.bashrc'
