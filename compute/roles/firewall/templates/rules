@@ -27,4 +27,4 @@ ACCEPT          net:0.0.0.0/0   $FW             tcp     9696                    
 ACCEPT          net:0.0.0.0/0   $FW             tcp     8004                            #Heat API
 ACCEPT          net:0.0.0.0/0   $FW             tcp     6080                            #noVNC
 ACCEPT          net             $FW                     udp     1194                    #openvpn
-DNAT            net             lan:172.16.17.24:80     tcp     80  -   178.63.10.53    #loadbalancer
+DNAT            net             lan:172.16.17.24:80     tcp     80  -  136.243.196.2    #loadbalancer

@@ -2,9 +2,6 @@
 - name: yum update
   command: yum update -y
 
-- name: restart networking
-  service: name=network.service  state=restarted
-
 - name: restart cinder api
   service: name=openstack-cinder-api.service state=restarted
 

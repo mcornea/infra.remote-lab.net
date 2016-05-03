@@ -11,3 +11,4 @@
 #                   OPTIONS         OPTIONS
 fw  firewall
 net ipv4
+lan ipv4

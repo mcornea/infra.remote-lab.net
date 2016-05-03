@@ -12,6 +12,7 @@
     - yum-cron
     - postfix
     - tmux
+    - sysstat
 
 - name: set up bashrc
   template: src=bashrc dest='~/.bashrc'

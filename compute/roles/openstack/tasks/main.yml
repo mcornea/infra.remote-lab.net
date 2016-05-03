@@ -23,6 +23,15 @@
 - name: disable ceilometer
   lineinfile: dest=~/answers regexp=^CONFIG_CEILOMETER_INSTALL line=CONFIG_CEILOMETER_INSTALL=n
 
+- name: disable aodh
+  lineinfile: dest=~/answers regexp=^CONFIG_AODH_INSTALL line=CONFIG_AODH_INSTALL=n
+
+- name: disable gnocchi
+  lineinfile: dest=~/answers regexp=^CONFIG_GNOCCHI_INSTALL line=CONFIG_GNOCCHI_INSTALL=n
+
+- name: disable swift
+  lineinfile: dest=~/answers regexp=^CONFIG_SWIFT_INSTALL line=CONFIG_SWIFT_INSTALL=n
+
 - name: enable heat
   lineinfile: dest=~/answers regexp=^CONFIG_HEAT_INSTALL line=CONFIG_HEAT_INSTALL=y
 
@@ -99,10 +108,6 @@
 
 - name: Create br-ex ifcfg script
   copy:  src=ifcfg-br-ex dest=/etc/sysconfig/network-scripts/ifcfg-br-ex
-  notify: restart networking
-
-- name: Create ifcfg-eth0:1 ifcfg script
-  copy:  src=ifcfg-eth0:1 dest=/etc/sysconfig/network-scripts/ifcfg-eth0:1
   notify: restart networking
 
 - name: Workaround for Horizon error
