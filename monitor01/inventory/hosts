@@ -42,7 +42,9 @@ monitor01.remote-lab.net
 galera01.remote-lab.net
 galera02.remote-lab.net
 galera03.remote-lab.net
+vpngw01.remote-lab.net
 compute.remote-lab.net ansible_ssh_user=root
+vido.remote-lab.net ansible_ssh_user=debian
 
 # ------------------------------------------
 

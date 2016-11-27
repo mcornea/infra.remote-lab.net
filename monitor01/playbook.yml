@@ -67,7 +67,6 @@
   tags:
     - sensu_client
   roles:
-    - repos/opstools
     - sensu/client
 
 #- name: Install ElasticSearch

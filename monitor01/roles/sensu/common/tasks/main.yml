@@ -1,32 +1,65 @@
 ---
-- name: Enable Sensu repository
-  copy:
-    src: sensu.repo
-    dest: '{{ yum_repos_d }}/sensu.repo'
-  when: manage_repos|default(false)
+- block:
+    - name: Enable Sensu repository
+      copy:
+        src: sensu.repo
+        dest: '{{ yum_repos_d }}/sensu.repo'
+      when: manage_repos|default(false)
+    
+    - name: Ensure repoquery command is available
+      package:
+        name: yum-utils
+        state: present
+      when: manage_packages|default(false)
+    
+    - name: Check for obsolete sensu package
+      command: >
+        repoquery --installed --whatprovides
+        '{{ sensu_package_name }} <= {{ sensu_minimum_version }}'
+      changed_when: false
+      failed_when: false
+      register: sensu_version
+      when: manage_packages|default(false)
+    
+    - name: Remove obsolete sensu package
+      package:
+        name: '{{ item }}'
+        state: absent
+      with_items: '{{ sensu_version.stdout_lines }}'
+      when: manage_packages|default(false)
+  when: ansible_distribution == 'RedHat'
 
-- name: Ensure repoquery command is available
-  package:
-    name: yum-utils
-    state: present
-  when: manage_packages|default(false)
+- block:
+    - name: Install Sensu GPG public key
+      apt_key: 
+        url: https://sensu.global.ssl.fastly.net/apt/pubkey.gpg
+        state: present
+      register: sensukey
+    
+    - name: Update APT cache
+      apt: 
+        update_cache: yes
+      when: sensukey.changed
 
-- name: Check for obsolete sensu package
-  command: >
-    repoquery --installed --whatprovides
-    '{{ sensu_package_name }} <= {{ sensu_minimum_version }}'
-  changed_when: false
-  failed_when: false
-  register: sensu_version
-  when: manage_packages|default(false)
+    - name: Install apt-transport-https
+      package:
+        name: 'apt-transport-https'
+        state: installed
+      when: manage_packages|default(false)
 
-- name: Remove obsolete sensu package
-  package:
-    name: '{{ item }}'
-    state: absent
-  with_items: '{{ sensu_version.stdout_lines }}'
-  when: manage_packages|default(false)
+    - name: Enable Sensu repository
+      copy:
+        src: sensu.list
+        dest: '{{ apt_sources_list }}/sensu.list'
+      register: sensurepo
 
+    - name: Update APT cache
+      apt: 
+        update_cache: yes
+      when: sensurepo.changed
+
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    
 - name: Install sensu
   package:
     name: '{{ sensu_package_name }}'
