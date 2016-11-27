@@ -1,0 +1,53 @@
+---
+- name: Enable grafana repository
+  copy:
+    src: grafana.repo
+    dest: '{{yum_repos_d}}/grafana.repo'
+  when: manage_repos|default(false)
+
+- name: Install grafana
+  package:
+    name: '{{ grafana_package_name }}'
+    state: present
+  when: manage_packages|default(false)
+
+- name: Configure grafana server section
+  ini_file:
+    dest: '{{ grafana_config_file }}'
+    section: server
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
+    backup: yes
+  with_items:
+    - option: 'http_port'
+      value: '{{ grafana_port }}'
+  notify: restart grafana-server
+
+- name: Disable users registration
+  ini_file:
+    dest: '{{ grafana_config_file }}'
+    section: users
+    option: '{{ item.option }}'
+    value: '{{ item.value }}'
+    backup: yes
+  with_items:
+    - option: 'allow_sign_up'
+      value: 'false'
+  notify: restart grafana-server
+
+- name: Enable grafana
+  service:
+    name: '{{ grafana_service_name }}'
+    state: started
+    enabled: yes
+  when: manage_services|default(false)
+
+- name: Insert firewalld rule for grafana
+  set_fact:
+    firewall_data: >
+      {{ firewall_data }} + [
+        {
+          'port': "{{ grafana_port }}",
+          'protocol': 'tcp'
+        }
+      ]

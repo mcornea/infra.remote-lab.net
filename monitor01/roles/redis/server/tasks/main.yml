@@ -1,0 +1,51 @@
+---
+- name: Install redis
+  package:
+    name: '{{ redis_package_name }}'
+    state: installed
+  when: manage_packages|default(false)
+
+- name: Set listen port at redis config
+  replace:
+    dest: '{{ redis_config_file }}'
+    regexp: '^port.*\n'
+    replace: 'port {{ redis_listen_port }}\n'
+  notify: restart redis
+
+- name: Add bind interface at the redis config
+  replace:
+    dest: '{{ redis_config_file }}'
+    regexp: '^bind.*\n'
+    replace: 'bind {{ " ".join(redis_interface) }}\n'
+  notify: restart redis
+
+- name: Ensure protected mode is enabled
+  replace:
+    dest: '{{ redis_config_file }}'
+    regexp: '^protected-mode.*\n'
+    replace: 'protected-mode yes\n'
+  notify: restart redis
+
+- name: Set password
+  replace:
+    dest: '{{ redis_config_file }}'
+    regexp: '^(# )+requirepass.*\n'
+    replace: 'requirepass {{ redis_password }}\n'
+  notify: restart redis
+
+- name: Ensure redis is started and enabled at boot
+  service:
+    name: '{{ redis_service_name }}'
+    state: started
+    enabled: yes
+  when: manage_services|default(false)
+
+- name: Register redis firewall port
+  set_fact:
+    firewall_data: >
+      {{ firewall_data }} + [
+        {
+          'port': "{{ redis_listen_port }}",
+          'protocol': 'tcp'
+        }
+      ]

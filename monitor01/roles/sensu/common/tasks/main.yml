@@ -1,0 +1,54 @@
+---
+- name: Enable Sensu repository
+  copy:
+    src: sensu.repo
+    dest: '{{ yum_repos_d }}/sensu.repo'
+  when: manage_repos|default(false)
+
+- name: Ensure repoquery command is available
+  package:
+    name: yum-utils
+    state: present
+  when: manage_packages|default(false)
+
+- name: Check for obsolete sensu package
+  command: >
+    repoquery --installed --whatprovides
+    '{{ sensu_package_name }} <= {{ sensu_minimum_version }}'
+  changed_when: false
+  failed_when: false
+  register: sensu_version
+  when: manage_packages|default(false)
+
+- name: Remove obsolete sensu package
+  package:
+    name: '{{ item }}'
+    state: absent
+  with_items: '{{ sensu_version.stdout_lines }}'
+  when: manage_packages|default(false)
+
+- name: Install sensu
+  package:
+    name: '{{ sensu_package_name }}'
+    state: installed
+  when: manage_packages|default(false)
+
+- name: Create directory to store SSL certificates
+  file: path={{ sensu_rabbitmq_ssldir }} state=directory
+
+- name: Copy SSL certificate and key
+  copy:
+    src: '{{ sensu_rabbitmq_localssldir }}/{{ item }}'
+    dest: '{{ sensu_rabbitmq_ssldir }}/{{ item }}'
+  with_items:
+    - 'key.pem'
+    - 'cert.pem'
+
+- name: Configure rabbitmq on sensu
+  template:
+    src: templates/{{ item }}.json.j2
+    dest: '{{ sensu_config_path }}/{{ item }}.json'
+    owner: '{{ sensu_owner }}'
+    group: '{{ sensu_group }}'
+  with_items:
+    - rabbitmq

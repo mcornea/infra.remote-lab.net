@@ -1,0 +1,8 @@
+{% set comma = joiner(",\n") -%}
+{
+    "handlers": {
+{% for handler in sensu_enabled_handlers %}
+{{ comma() }}
+{% include "sensu_handler-" + handler + ".json.j2" %}
+{% endfor %}
+}}

@@ -1,0 +1,8 @@
+    "metric_mysql": {
+      "type": "metric",
+      "command": "source /etc/sysconfig/clustercheck; metrics-mysql-graphite.rb -u $MYSQL_USERNAME -p $MYSQL_PASSWORD -h $MYSQL_HOST",
+      "interval": 60,
+      "subscribers": ["db_sync"],
+      "handlers": ["graphite"]
+    }
+

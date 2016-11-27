@@ -1,0 +1,12 @@
+[
+  {rabbit, [
+     {ssl_listeners, [{{ rabbitmq_port }}]},
+     {ssl_options, [{cacertfile,"{{ rabbitmq_cacertfile }}"},
+                    {certfile,"{{ rabbitmq_certfile }}"},
+                    {keyfile,"{{ rabbitmq_keyfile }}"},
+                    {versions, ['tlsv1.2']},
+                    {ciphers,  [{rsa,aes_256_cbc,sha256}]},
+                    {verify,verify_peer},
+                    {fail_if_no_peer_cert,true}]}
+   ]}
+].

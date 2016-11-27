@@ -1,0 +1,10 @@
+ {
+   "sensu": {{ sensu_datacenters|to_json }},
+   "uchiwa": {
+     "user": "{{ uchiwa_user }}",
+     "pass": "{{ uchiwa_user_pass }}",
+     "host": "{{ ansible_default_ipv4.address }}",
+     "port": {{ uchiwa_port }},
+     "refresh": {{ uchiwa_refresh }}
+   }
+}

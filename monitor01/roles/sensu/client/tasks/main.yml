@@ -1,0 +1,53 @@
+---
+- name: Add script files
+  copy: 
+    src: '{{ item }}'
+    dest: '{{ sensu_plugins_dir }}/{{ item }}'
+    mode: 0755
+  with_items:
+    - 'check-load.rb'
+    - 'check-disk.rb'
+    - 'metric_load.rb'
+
+- name: Add DB server check scripts
+  copy: 
+    src: '{{ item }}'
+    dest: '{{ sensu_plugins_dir }}/{{ item }}'
+    mode: 0755
+  with_items:
+    - 'clustercheck'
+  when: ansible_fqdn in groups['sensu_db_sync']
+
+- name: Install sensu-plugins-raid-checks
+  shell: "/opt/sensu/embedded/bin/gem install sensu-plugins-raid-checks"
+  when: ansible_fqdn in groups['sensu_raid']
+
+- name: Configure sensu client
+  template:
+    src: 'templates/client.json.j2'
+    dest: '{{sensu_config_path}}/client.json'
+    owner: '{{ sensu_owner }}'
+    group: '{{ sensu_group }}'
+  notify:
+    - restart sensu client
+
+# This is a workaround for https://github.com/sensu/sensu/issues/1478
+- name: Ensure correct ownership on directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: sensu
+    group: sensu
+    recurse: true
+  with_items:
+    - /var/log/sensu
+    - /var/run/sensu
+  notify:
+    - restart sensu client
+
+- name: Ensure sensu is started and enabled at boot
+  service:
+    name: 'sensu-client'
+    state: restarted
+    enabled: yes
+  when: manage_services|default(false)

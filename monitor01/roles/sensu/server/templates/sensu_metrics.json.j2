@@ -1,0 +1,8 @@
+{% set comma = joiner(",\n") -%}
+{
+    "checks": {
+{% for metric in sensu_enabled_metrics %}
+{{ comma() }}
+{% include "sensu_metric-" + metric + ".json.j2" %}
+{% endfor %}
+}}

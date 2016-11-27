@@ -1,0 +1,42 @@
+---
+# Address on which Sensu should listen for connections.
+sensu_api_bind: 0.0.0.0
+
+# Port on which Sensu should listen.
+sensu_api_port: 4567
+
+# Address to which clients should connect to contact the Sensu API.
+sensu_api_server: localhost
+
+# Address of the Redis server to which Sensu should connect.
+sensu_redis_server: 127.0.0.1
+
+# Port on which the Redis server listens.
+sensu_redis_port: '{{ redis_listen_port }}'
+
+# Password for authenticating to Redis.
+sensu_redis_password: "{{ redis_password }}"
+
+# A list of enabled Sensu checks.
+sensu_enabled_checks:
+  - load_check
+  - disk_check
+  - galerasync_check
+  - raid_check
+
+# A list of enabled Sensu handlers.
+sensu_enabled_handlers:
+  - graphite
+  - mailer
+
+# A list of enabled Sensu metrics.
+sensu_enabled_metrics:
+  - load
+  - mysql
+
+sensu_admin_gui_url: https://status.domain.tld
+sensu_smtp_mailfrom: root@monitor.domain.tld
+sensu_smtp_mailto: user@domain.tld
+sensu_smtp_addres: 127.0.0.1
+sensu_smtp_port: 25
+sensu_smtp_domain: domain.tld

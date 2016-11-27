@@ -1,0 +1,43 @@
+---
+# Port on which RabbitMQ should listen.
+rabbitmq_port: 5671
+
+# Addresses on which RabbitMQ should listen for connections.
+rabbitmq_interface:
+  - "::"
+
+# RabbitMQ package name.
+rabbitmq_package_name: rabbitmq-server
+
+# RabbitMQ service name.
+rabbitmq_service_name: rabbitmq-server
+
+# Default RabbitMQ user.
+rabbitmq_default_user: guest
+
+# Path to RabbitMQ configuration file.
+rabbitmq_config_file: /etc/rabbitmq/rabbitmq.config
+
+# Owner of RabbitMQ configuration files.
+rabbitmq_config_owner: rabbitmq
+
+# Group of RabbitMQ configuration files.
+rabbitmq_config_group: rabbitmq
+
+# Mode of RabbitMQ configuration files.
+rabbitmq_config_mode: "0644"
+
+# SSL certificates directory.
+rabbitmq_ssldir: /etc/rabbitmq/ssl
+    
+# Local directory to save SSL certificates.
+rabbitmq_localssldir: ~/sensu.certs
+
+# SSL CA file.
+rabbitmq_cacertfile: /etc/rabbitmq/ssl/sensu_ssl_tool/sensu_ca/cacert.pem
+
+# SSL Cert file.
+rabbitmq_certfile: /etc/rabbitmq/ssl/sensu_ssl_tool/server/cert.pem
+
+# SSL key file.
+rabbitmq_keyfile: /etc/rabbitmq/ssl/sensu_ssl_tool/server/key.pem

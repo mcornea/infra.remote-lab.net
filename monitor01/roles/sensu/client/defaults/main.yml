@@ -1,0 +1,5 @@
+---
+# A list of enabled Sensu checks.
+sensu_plugins_dir: /etc/sensu/plugins/
+sensu_enabled_oschecks:
+  - load_check

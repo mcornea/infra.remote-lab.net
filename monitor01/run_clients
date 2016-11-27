@@ -1,0 +1,1 @@
+ansible-playbook -i inventory/hosts playbook.yml  --tags='sensu_client' -e @allvars.yaml

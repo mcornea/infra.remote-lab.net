@@ -1,0 +1,81 @@
+---
+- name: Install rabbitmq-server rpm
+  package:
+    name: '{{ rabbitmq_package_name }}'
+    state: present
+  when: manage_packages|default(false)
+
+- name: Install openssl rpm
+  package:
+    name: 'openssl'
+    state: present
+  when: manage_packages|default(false)
+
+- name: Create directory to store SSL certificates
+  file: path={{ rabbitmq_ssldir }} state=directory
+
+- name: Verify if client certificate already exists
+  stat: path='{{ rabbitmq_ssldir }}/sensu_ssl_tool/client/cert.pem'
+  register: iscert
+
+- block:
+    - name: Download Sensu SSL tool
+      get_url: 
+        url: http://sensuapp.org/docs/0.26/files/sensu_ssl_tool.tar
+        dest: '{{ rabbitmq_ssldir }}'
+    
+    - name: Untar Sensu SSL tool
+      shell: 'tar xf sensu_ssl_tool.tar'
+      args:
+        chdir: '{{ rabbitmq_ssldir }}'
+    
+    - name: Generate certificate files
+      shell: "bash ssl_certs.sh generate"
+      args:
+        chdir: '{{ rabbitmq_ssldir }}/sensu_ssl_tool'
+  when: not iscert.stat.exists
+
+- name: Fetch client SSL cert
+  fetch: src={{ rabbitmq_ssldir }}/sensu_ssl_tool/client/cert.pem dest={{ rabbitmq_localssldir }}/cert.pem flat=yes
+
+- name: Fetch client SSL key
+  fetch: src={{ rabbitmq_ssldir }}/sensu_ssl_tool/client/key.pem dest={{ rabbitmq_localssldir }}/key.pem flat=yes
+
+- name: Generate rabbitmq configuration
+  template:
+    src: rabbitmq.config.j2
+    dest: '{{ rabbitmq_config_file }}'
+    owner: '{{ rabbitmq_config_owner }}'
+    group: '{{ rabbitmq_config_group }}'
+    mode: '{{ rabbitmq_config_mode }}'
+  notify: restart rabbitmq
+
+# Include the rabbitmq plugin to be able to create a vhost
+- name: Add plugin to manage rabbitmq
+  rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+  notify: restart rabbitmq
+
+- name: Start the rabbitmq service
+  service:
+    name: '{{ rabbitmq_service_name }}'
+    state: started
+    enabled: yes
+  when: manage_services|default(false)
+
+- name: Delete guest user on rabbitmq
+  rabbitmq_user:
+    user: '{{ rabbitmq_default_user }}'
+    state: absent
+
+- name: Register rabbitmq firewall ports
+  set_fact:
+    firewall_data: >
+      {{ firewall_data }} + [
+        {
+          'port': "{{ item.port|default(rabbitmq_port) }}",
+          'protocol': 'tcp'
+        }
+      ]
+  with_items: '{{ rabbitmq_interface }}'

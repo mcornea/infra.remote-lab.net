@@ -1,0 +1,20 @@
+{
+  "client": {
+    "name": "{{ ansible_fqdn }}",
+    "address": "{{ ansible_default_ipv4.address }}",
+{% if ansible_fqdn in groups['sensu_db_sync'] %}
+    "subscriptions": [ "all", "db_sync" ],
+{% elif ansible_fqdn in groups['sensu_raid'] %}
+    "subscriptions": [ "all", "raid" ],
+{% else %}
+    "subscriptions": [ "all" ],
+{% endif %}
+    "keepalive": {
+      "thresholds": {
+          "warning": 120,
+          "critical": 180
+      },
+      "handlers": ["mailer"]
+    }
+  }
+}
