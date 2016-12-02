@@ -44,6 +44,7 @@
     - 'check-disk.rb'
     - 'metric_load.rb'
     - 'metrics-per-process.py'
+    - 'check-dirvish.py'
 
 - name: Add sensu sudoers file
   copy: 

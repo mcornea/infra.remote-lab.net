@@ -24,6 +24,7 @@ sensu_enabled_checks:
   - galerasync_check
   - raid_check
   - mysqldalive_check
+  - dirvishbackup_check
 
 # A list of enabled Sensu handlers.
 sensu_enabled_handlers:

@@ -1,0 +1,8 @@
+  "dirvishbackup_check": {
+    "handlers": ["mailer"],
+    "command": "/usr/bin/sudo /etc/sensu/plugins/check-dirvish.py",
+    "interval": 60,
+    "subscribers": [ "dirvishbackup" ]
+  }
+
+
