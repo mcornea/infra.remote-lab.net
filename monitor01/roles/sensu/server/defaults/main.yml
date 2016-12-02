@@ -33,6 +33,7 @@ sensu_enabled_handlers:
 sensu_enabled_metrics:
   - load
   - mysql
+  - cpu_pcnt
 
 sensu_admin_gui_url: https://status.domain.tld
 sensu_smtp_mailfrom: root@monitor.domain.tld

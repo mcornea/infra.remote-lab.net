@@ -21,7 +21,7 @@ sensu_owner: sensu
 sensu_group: sensu
 
 # Address of RabbitMQ server to which Sensu should connect.
-sensu_rabbitmq_server: 172.16.17.38
+sensu_rabbitmq_server: monitor01.remote-lab.net
 
 # Port of the RabbitMQ server.
 sensu_rabbitmq_port: 5671

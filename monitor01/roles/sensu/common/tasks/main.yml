@@ -27,7 +27,7 @@
         state: absent
       with_items: '{{ sensu_version.stdout_lines }}'
       when: manage_packages|default(false)
-  when: ansible_distribution == 'RedHat'
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
 
 - block:
     - name: Install Sensu GPG public key

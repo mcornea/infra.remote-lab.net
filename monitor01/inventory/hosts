@@ -45,6 +45,8 @@ galera03.remote-lab.net
 vpngw01.remote-lab.net
 compute.remote-lab.net ansible_ssh_user=root
 vido.remote-lab.net ansible_ssh_user=debian
+mydailybag.remote-lab.net ansible_ssh_user=debian
+web01.track2sell.info ansible_ssh_user=root
 
 # ------------------------------------------
 
