@@ -30,6 +30,7 @@
   shell: '/opt/sensu/embedded/bin/gem install {{ item }}'
   with_items:
     - 'sensu-plugins-cpu-checks'
+    - 'sensu-plugins-memory-checks'
 
 - name: Configure sensu client
   template:
