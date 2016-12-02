@@ -1,0 +1,8 @@
+    "metric_apache2_proc": {
+      "type": "metric",
+      "command": "sudo /etc/sensu/plugins/metrics-per-process.py -n apache2 -s $(hostname).apache2_proc_metrics",
+      "interval": 60,
+      "subscribers": ["webserver_apache2"],
+      "handlers": ["graphite"]
+    }
+

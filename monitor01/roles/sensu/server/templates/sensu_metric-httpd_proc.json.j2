@@ -1,0 +1,8 @@
+    "metric_httpd_proc": {
+      "type": "metric",
+      "command": "sudo /etc/sensu/plugins/metrics-per-process.py -n httpd -s $(hostname).httpd_proc_metrics",
+      "interval": 60,
+      "subscribers": ["webserver_httpd"],
+      "handlers": ["graphite"]
+    }
+

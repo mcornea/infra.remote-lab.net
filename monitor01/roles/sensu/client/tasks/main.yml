@@ -1,4 +1,34 @@
 ---
+- name: Install pip and utilities
+  package:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - 'python-pip'
+    - 'gcc'
+    - 'python-devel'
+  when: ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS'
+  register: rpmpip
+
+- name: Install pip and utilities
+  package:
+    name: '{{ item }}'
+    state: installed
+  with_items:
+    - 'python-pip'
+    - 'build-essential'
+    - 'python-dev'
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  register: debpip
+
+- name: Upgrade pip
+  shell: "pip install --upgrade pip"
+  when: rpmpip.changed or debpip.changed
+
+- name: Install psutils pip package
+  pip:
+    name: 'psutil'
+
 - name: Add script files
   copy: 
     src: '{{ item }}'
@@ -8,6 +38,12 @@
     - 'check-load.rb'
     - 'check-disk.rb'
     - 'metric_load.rb'
+    - 'metrics-per-process.py'
+
+- name: Add sensu sudoers file
+  copy: 
+    src: 'sensu.sudoers'
+    dest: '/etc/sudoers.d/sensu'
 
 - name: Add DB server check scripts
   copy: 
@@ -16,21 +52,22 @@
     mode: 0755
   with_items:
     - 'clustercheck'
-  when: ansible_fqdn in groups['sensu_db_sync']
+  when: ansible_fqdn in groups['db_sync']
 
 - name: Install sensu-plugins-raid-checks
   shell: "/opt/sensu/embedded/bin/gem install sensu-plugins-raid-checks"
-  when: ansible_fqdn in groups['sensu_raid']
+  when: ansible_fqdn in groups['raid']
 
 - name: Install sensu-plugins-mysql
   shell: "/opt/sensu/embedded/bin/gem install sensu-plugins-mysql"
-  when: ansible_fqdn in groups['sensu_db_server']
+  when: ansible_fqdn in groups['db_server']
 
 - name: Install Sensu plugins
   shell: '/opt/sensu/embedded/bin/gem install {{ item }}'
   with_items:
     - 'sensu-plugins-cpu-checks'
     - 'sensu-plugins-memory-checks'
+    - 'sensu-plugins-process-checks'
 
 - name: Configure sensu client
   template:

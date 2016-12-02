@@ -1,0 +1,4 @@
+Defaults:sensu !requiretty
+Defaults:sensu secure_path = /usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+sensu ALL = NOPASSWD: /etc/sensu/plugins/check-dirvish.py, /etc/sensu/plugins/metrics-per-process.py

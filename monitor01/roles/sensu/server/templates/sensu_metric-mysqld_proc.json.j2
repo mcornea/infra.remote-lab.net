@@ -1,0 +1,8 @@
+    "metric_mysqld_proc": {
+      "type": "metric",
+      "command": "sudo /etc/sensu/plugins/metrics-per-process.py -n mysqld -s $(hostname).mysqld_proc_metrics",
+      "interval": 60,
+      "subscribers": ["db_server"],
+      "handlers": ["graphite"]
+    }
+

@@ -61,7 +61,7 @@
     - grafana
 
 - name: Install Sensu clients
-  hosts: client_hosts
+  hosts: base
   remote_user: centos
   become: yes
   tags:

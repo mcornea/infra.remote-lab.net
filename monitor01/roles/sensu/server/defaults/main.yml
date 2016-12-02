@@ -35,6 +35,9 @@ sensu_enabled_metrics:
   - mysql
   - cpu_pcnt
   - memory_pcnt
+  - mysqld_proc
+  - apache2_proc
+  - httpd_proc
 
 sensu_admin_gui_url: https://status.domain.tld
 sensu_smtp_mailfrom: root@monitor.domain.tld
