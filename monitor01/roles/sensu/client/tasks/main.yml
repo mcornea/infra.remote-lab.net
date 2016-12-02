@@ -22,6 +22,10 @@
   shell: "/opt/sensu/embedded/bin/gem install sensu-plugins-raid-checks"
   when: ansible_fqdn in groups['sensu_raid']
 
+- name: Install sensu-plugins-mysql
+  shell: "/opt/sensu/embedded/bin/gem install sensu-plugins-mysql"
+  when: ansible_fqdn in groups['sensu_db_server']
+
 - name: Install Sensu plugins
   shell: '/opt/sensu/embedded/bin/gem install {{ item }}'
   with_items:

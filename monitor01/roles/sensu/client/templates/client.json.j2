@@ -4,6 +4,8 @@
     "address": "{{ ansible_default_ipv4.address }}",
 {% if ansible_fqdn in groups['sensu_db_sync'] %}
     "subscriptions": [ "all", "db_sync" ],
+{% elif ansible_fqdn in groups['sensu_db_server'] %}
+    "subscriptions": [ "all", "db_server" ],
 {% elif ansible_fqdn in groups['sensu_raid'] %}
     "subscriptions": [ "all", "raid" ],
 {% else %}
