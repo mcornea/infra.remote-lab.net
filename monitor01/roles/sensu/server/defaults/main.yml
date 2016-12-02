@@ -23,6 +23,7 @@ sensu_enabled_checks:
   - disk_check
   - galerasync_check
   - raid_check
+  - mysqldalive_check
 
 # A list of enabled Sensu handlers.
 sensu_enabled_handlers:
@@ -38,6 +39,7 @@ sensu_enabled_metrics:
   - mysqld_proc
   - apache2_proc
   - httpd_proc
+  - iostat
 
 sensu_admin_gui_url: https://status.domain.tld
 sensu_smtp_mailfrom: root@monitor.domain.tld

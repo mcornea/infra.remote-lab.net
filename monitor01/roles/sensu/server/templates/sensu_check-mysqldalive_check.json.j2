@@ -1,0 +1,8 @@
+  "mysqldalive_check": {
+    "handlers": ["mailer"],
+    "command": "source /etc/sysconfig/clustercheck; check-mysql-alive.rb -u $MYSQL_USERNAME -p $MYSQL_PASSWORD -h $MYSQL_HOST -d $MYSQL_DATABASE",
+    "interval": 60,
+    "subscribers": [ "db_server" ]
+  }
+
+

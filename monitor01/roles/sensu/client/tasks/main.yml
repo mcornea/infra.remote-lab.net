@@ -1,4 +1,9 @@
 ---
+- name: Install systat for iostat
+  package:  
+    name: 'sysstat'
+    state: present
+
 - name: Install pip and utilities
   package:
     name: '{{ item }}'
@@ -68,6 +73,7 @@
     - 'sensu-plugins-cpu-checks'
     - 'sensu-plugins-memory-checks'
     - 'sensu-plugins-process-checks'
+    - 'sensu-plugins-io-checks'
 
 - name: Configure sensu client
   template:
