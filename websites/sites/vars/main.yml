@@ -1,6 +1,7 @@
 ---
 websites:
   - vidomaintenance.ca
+  - mydailybag.com
 
 plugins:
   - cloudflare
