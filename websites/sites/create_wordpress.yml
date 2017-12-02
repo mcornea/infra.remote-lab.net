@@ -1,0 +1,77 @@
+---
+- name: Create nginx virtualhosts
+  hosts: webloadbalancer-0
+  sudo: yes
+  vars_files: 
+    - vars/main.yml
+  tags:
+   - nginxvhosts
+  handlers:
+    - include: handlers/main.yml
+  tasks:
+    - include: tasks/virtualhost.yml
+      with_indexed_items: "{{ websites }}"
+      loop_control:
+        loop_var: site
+
+    - block:
+        - name: register list of virtualhost files
+          shell: |
+            ls /etc/nginx/conf.d/ | sed s/.conf//
+          register: existing_vhosts
+    
+        - name: delete files which are not defined in vars
+          file:
+            dest: "/etc/nginx/conf.d/{{ item}}.conf"
+            state: absent
+          with_items: "{{ existing_vhosts.stdout_lines }}"
+          when: "item not in websites "
+    
+      when: "deleteundefined is defined"
+
+- name: Create document root in /var/www
+  hosts: webloadbalancer-0
+  sudo: yes
+  vars_files: 
+    - vars/main.yml
+  tags:
+   - documentroot
+  tasks:
+    - include: tasks/documentroot.yml
+      with_indexed_items: "{{ websites }}"
+      loop_control:
+        loop_var: site
+
+    - block:
+        - name: register list of documentroot directories
+          shell: |
+            ls /var/www | grep -v index
+          register: existing_docroot
+    
+        - name: delete document root
+          file:
+            dest: "/var/www/{{ item }}"
+            state: absent
+          with_items: "{{ existing_docroot.stdout_lines }}"
+          when: "item not in websites "
+    
+      when: "deleteundefined is defined"
+
+- name: Set up application
+  hosts: webloadbalancer-0
+  sudo: yes
+  vars_files: 
+    - vars/main.yml
+  tags:
+   - application
+  tasks:
+    - name: download wp-cli
+      get_url:
+        url: https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        dest: /opt/wp
+        mode: 0755
+
+    - include: tasks/application.yml
+      with_indexed_items: "{{ websites }}"
+      loop_control:
+        loop_var: site

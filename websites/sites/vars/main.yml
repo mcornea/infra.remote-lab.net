@@ -1,0 +1,15 @@
+---
+websites:
+  - vidomaintenance.ca
+
+plugins:
+  - cloudflare
+  - cloudflare-flexible-ssl
+
+users:
+  admin:
+    name: admin
+    email: marius@remote-lab.net
+#  user1:
+#    name: user1
+#    email: user1@remote-lab.net

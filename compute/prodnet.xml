@@ -1,0 +1,11 @@
+<network>
+  <name>prodnet</name>
+  <forward mode='route'>
+  </forward>
+  <bridge name='prodnet' stp='on' delay='0'/>
+  <ip address='172.16.17.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='172.16.17.20' end='172.16.17.200'/>
+    </dhcp>
+  </ip>
+</network>

@@ -1,0 +1,13 @@
+- name: Test playbook
+  hosts: localhost
+  vars_files: 
+    - vars/main.yml
+  tasks:
+    - debug:
+       msg: "User {{ item.key }} is {{ item.value.name }} ({{ item.value.email }})"
+      with_dict: "{{ users }}"
+      when: "'admin' not in item.key"
+        
+    - debug:
+       msg: "User {{ users.admin.name }} is ({{ users.admin.email }})"
+

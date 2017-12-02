@@ -1,0 +1,23 @@
+---
+- name: Set up base configuration
+  hosts: webloadbalancer-0
+  tags:
+   - base
+  roles:
+   - base 
+
+- name: Set up database configuration
+  hosts: webloadbalancer-0
+  become: yes
+  tags:
+   - db
+  roles:
+   - db
+
+- name: Set up web servers configuration
+  hosts: webloadbalancer-0
+  become: yes
+  tags:
+   - web
+  roles:
+   - web

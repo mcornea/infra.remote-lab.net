@@ -34,13 +34,13 @@ sensu_enabled_handlers:
 # A list of enabled Sensu metrics.
 sensu_enabled_metrics:
   - load
-  - mysql
   - cpu_pcnt
   - memory_pcnt
   - mysqld_proc
   - apache2_proc
   - httpd_proc
   - iostat
+  - tradeville
 
 sensu_admin_gui_url: https://status.domain.tld
 sensu_smtp_mailfrom: root@monitor.domain.tld

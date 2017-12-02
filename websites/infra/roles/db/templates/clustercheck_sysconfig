@@ -1,0 +1,3 @@
+MYSQL_USERNAME=root
+MYSQL_PASSWORD='{{ db.root_pass}}'
+MYSQL_HOST='{{ ansible_eth0.ipv4.address }}'

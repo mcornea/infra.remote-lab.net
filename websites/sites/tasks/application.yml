@@ -1,0 +1,125 @@
+---
+- name: Create database
+  mysql_db:
+    name: "{{ site.1 | splitext | first | regex_replace('\\.', '') }}"
+    state: present
+
+- name: Check if user exists
+  shell: |
+    mysql -e "select * from mysql.user" | grep {{ site.1 | splitext | first | regex_replace('\.', '') }}
+  ignore_errors: true
+  register: sqluser
+
+- block:
+    - name: Generate a password
+      shell: "openssl rand -hex 10"
+      register: mysqlpass
+    
+    - name: Create database user
+      mysql_user:
+        name: "{{ site.1 | splitext | first | regex_replace('\\.', '') }}"
+        password: "{{ mysqlpass.stdout }}"
+        priv: "{{ site.1 | splitext | first | regex_replace('\\.', '') }}.*:ALL"
+        state: present
+  when: sqluser.rc != 0
+
+- stat: 
+    path: "/var/www/{{ site.1 }}/index.php"
+  register: php_deployed
+
+- stat: 
+    path: "/var/www/{{ site.1 }}/index.html"
+  register: html_deployed
+
+- block:
+    - name: download wordpress
+      unarchive:
+        src: https://wordpress.org/latest.tar.gz
+        dest: "/var/www/{{ site.1 }}/"
+        remote_src: True
+        creates: "/var/www/{{ site.1 }}/wp-config.php"
+    
+    - name: move files
+      shell: "mv /var/www/{{ site.1 }}/wordpress/* /var/www/{{ site.1 }}/"
+    
+    - name: cleanup directory
+      file: 
+        path: "/var/www/{{ site.1 }}/wordpress"
+        state: absent
+    
+    - name: copy wp-config
+      copy:
+        src: "/var/www/{{ site.1 }}/wp-config-sample.php"
+        dest: "/var/www/{{ site.1 }}/wp-config.php"
+        remote_src: True
+
+    - name: create htaccess file
+      copy:
+        src: ../files/htaccess
+        dest: "/var/www/{{ site.1 }}/.htaccess"
+
+    - name: Generate a random string
+      shell: "openssl rand -hex 20"
+      register: randstring
+    
+    - name: configure db connection in wp-config
+      lineinfile:
+        path: "/var/www/{{ site.1 }}/wp-config.php"
+        regexp: "^define\\('{{ item }}'"
+        line: "define('{{ item }}',         '{{ site.1 | splitext | first | regex_replace('\\.', '') }}');"
+      with_items:
+       - 'DB_NAME'
+       - 'DB_USER'
+    
+    - name: configure db password in wp-config
+      lineinfile:
+        path: "/var/www/{{ site.1 }}/wp-config.php"
+        regexp: "^define\\('DB_PASSWORD'"
+        line: "define('DB_PASSWORD',         '{{ mysqlpass.stdout }}');"
+    
+    - name: configure AUTH_KEY in wp-config
+      lineinfile:
+        path: "/var/www/{{ site.1 }}/wp-config.php"
+        regexp: "^define\\('{{ item }}'"
+        line: "define('{{ item }}',         '{{ randstring.stdout }}');"
+      with_items:
+       - 'AUTH_KEY'
+       - 'SECURE_AUTH_KEY'
+       - 'LOGGED_IN_KEY'
+       - 'NONCE_KEY'
+       - 'AUTH_SALT'
+       - 'SECURE_AUTH_SALT'
+       - 'LOGGED_IN_SALT'
+       - 'NONCE_SALT'
+    - name: generate admin password
+      shell: "openssl rand -hex 10"
+      register: adminpass
+    
+    - name: install wordpress for {{ site.1 }}
+      shell: |
+        /opt/wp --allow-root --path=/var/www/{{ site.1 }}/ core install --url=https://{{ site.1 }} --title={{ site.1 }} --admin_user={{ users.admin.name }} --admin_password={{ adminpass.stdout }} --admin_email={{ users.admin.email }}
+    
+    - name: install wordpress plugins for {{ site.1 }}
+      shell: |
+        /opt/wp --allow-root --path=/var/www/{{ site.1 }}/ plugin install {{ item }} --activate
+      with_items: "{{ plugins }}"
+    
+    - name: print connection details
+      vars:
+        msg: |
+             Wordpress has been successfully installed for {{ site.1 }}
+             URL: https://{{ site.1 }}
+             Admin user: {{ users.admin.name }}
+             Admin password: {{ adminpass.stdout }}
+             Admin email: {{ users.admin.email }}
+      debug:
+        msg: "{{ msg.split('\n') }}"
+  when: php_deployed.stat.exists == false and html_deployed.stat.exists == false
+
+- name: restore correct permissions
+  file:
+    dest: "/var/www/{{ site.1 }}"
+    state: directory
+    owner: apache
+    group: apache
+    recurse: yes

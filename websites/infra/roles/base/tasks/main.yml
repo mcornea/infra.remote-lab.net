@@ -1,0 +1,19 @@
+---
+- name: install packages
+  yum: name={{ item }} state=installed 
+  with_items:
+   - epel-release
+   - postfix 
+   - vim
+   - git
+   - yum-plugin-security
+   - perl-TimeDate
+   - perl-Time-ParseDate
+   - perl-Time-Period
+   - atop
+   - cyrus-sasl-plain
+   - cyrus-sasl-md5
+   - nc
+
+- name: set SELinux permissive mode
+  selinux: policy=targeted state=permissive

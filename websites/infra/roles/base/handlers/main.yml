@@ -1,0 +1,11 @@
+---
+- name: postmap sasl_passwd
+  shell: "postmap /etc/postfix/sasl_passwd"
+
+- name: chmod sasl_passwd db
+  file: 
+    path: /etc/postfix/sasl_passwd.db
+    mode: 0600
+
+- name: restart postfix
+  service: name=postfix state=restarted

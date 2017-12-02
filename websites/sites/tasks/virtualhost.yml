@@ -1,0 +1,6 @@
+---
+- name: create virtualhost file
+  template:
+    dest: "/etc/nginx/conf.d/{{ site.1 }}.conf"
+    src: nginx_vhost.j2
+  notify: restart nginx

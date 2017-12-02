@@ -45,6 +45,7 @@
     - 'metric_load.rb'
     - 'metrics-per-process.py'
     - 'check-dirvish.py'
+    - 'metric_tradeville.sh'
 
 - name: Add sensu sudoers file
   copy: 

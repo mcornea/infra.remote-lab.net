@@ -1,0 +1,66 @@
+---
+- name: create directories
+  file:
+    dest: /var/www
+    state: directory
+
+- name: install packages
+  yum: name={{ item }} state=installed
+  with_items:
+    - nginx
+    - php-fpm
+    - php-mysqlnd
+    - php-cli
+    - php-gd
+    - php-xml
+    - php-apc
+
+- name: set up nginx.conf
+  template: src=nginx.conf.j2 dest=/etc/nginx/nginx.conf
+  notify: restart nginx 
+
+- name: set post_max_size in php.ini
+  ini_file:
+    path: /etc/php.ini
+    section: PHP
+    option: post_max_size
+    value: 30M
+  notify: restart php-fpm 
+
+- name: set upload_max_filesize in php.ini
+  ini_file:
+    path: /etc/php.ini
+    section: PHP
+    option: upload_max_filesize
+    value: 30M
+  notify: restart php-fpm 
+
+- name: set enable_dl in php.ini
+  ini_file:
+    path: /etc/php.ini
+    section: PHP
+    option: enable_dl
+    value: On
+  notify: restart php-fpm 
+
+- name: enable nginx and php-fpm
+  service: name={{ item }} state=started enabled=yes
+  with_items:
+    - nginx
+    - php-fpm
+
+- name: create an empty default index.html
+  copy:
+    content: ''
+    dest: /usr/share/nginx/html/index.html
+    remote_src: true
+
+- name: set correct ownership
+  file:
+    path: "{{ item }}"
+    owner: apache
+    group: apache
+    recurse: yes
+  with_items:
+    - /var/lib/php/session/
+    - /var/www
