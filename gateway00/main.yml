@@ -1,0 +1,66 @@
+- name: Generate nginx container
+  gather_facts: false
+  hosts: localhost
+  vars:
+      websites:
+          mydailybag:
+              hostname: 'mydailybag.com'
+              port: 80
+              backend: 192.168.0.21
+          vidomaintenance:
+              hostname: 'vidomaintenance.ca'
+              port: 80
+              backend: 192.168.0.21
+  tasks:
+      - name: Install required packages
+        package:
+            name: "{{ item }}"
+            state: installed
+        with_items:
+            - 'podman'
+
+      - name: Create directories
+        file:
+            path: /opt/nginx-container
+            state: directory
+
+      - name: Generate nginx config
+        template:
+            src: nginxconf.j2
+            dest: /opt/nginx-container/nginx.conf
+
+      - name: Generate Dockerfile
+        template:
+            src: nginxdockerfile.j2
+            dest: /opt/nginx-container/Dockerfile
+
+      - name: Check if container image already exists
+        shell: |
+            podman inspect --format {% raw %}'{{json .Created}}'{% endraw %} localhost/nginx
+        failed_when: false
+        register: _nginximage 
+
+      - name: Remove container image
+        shell: |
+             podman rmi -f localhost/nginx
+        when: _nginximage is success
+
+      - name: Build container image
+        shell: |
+             podman build -t nginx /opt/nginx-container/
+        args:
+            chdir: /opt/nginx-container/
+
+      - name: Check if container already exists
+        shell: |
+             podman inspect --format {% raw %}'{{json .State.Status}}'{% endraw %} nginx
+        register: _nginxcontainer 
+
+      - name: Remove container
+        shell: |
+             podman rm -f nginx
+        when: _nginxcontainer is success
+
+      - name: Start container
+        shell: |
+             podman run -d --name nginx -p 80:80 -t localhost/nginx

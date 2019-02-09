@@ -1,0 +1,23 @@
+events {
+    worker_connections  1024;
+}
+
+http {
+
+{% for key, value in websites.items() %}
+
+upstream {{ key }} {
+  server {{ value.backend }}:{{ value.port }};
+}
+
+server {
+  listen {{ value.port }};
+  server_name {{ value.hostname }};
+  location / {
+    proxy_pass http://{{ key }};
+  }
+}
+
+{% endfor %}
+
+}
