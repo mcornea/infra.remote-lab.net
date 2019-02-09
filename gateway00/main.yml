@@ -43,7 +43,9 @@
       - name: Remove container image
         shell: |
              podman rmi -f localhost/nginx
-        when: _nginximage is success
+        when:
+            - _nginximage is success
+            - _nginximage.stdout|length > 1
 
       - name: Build container image
         shell: |
@@ -59,8 +61,34 @@
       - name: Remove container
         shell: |
              podman rm -f nginx
-        when: _nginxcontainer is success
+        when: "'running' in _nginxcontainer.stdout"
 
       - name: Start container
         shell: |
              podman run -d --name nginx -p 80:80 -t localhost/nginx
+
+      - name: Create container systemd service
+        copy:
+            content: |
+                [Unit]
+                Description=Nginx Podman container
+                Wants=syslog.service
+                [Service]
+                Restart=always
+                ExecStart=/usr/bin/podman start -a nginx
+                ExecStop=/usr/bin/podman stop -t 10 nginx
+                [Install]
+                WantedBy=multi-user.target
+            dest: /etc/systemd/system/nginx.service
+        register: _nginxsystemd
+
+      - name: Reload systemd
+        systemd:
+            daemon_reload: yes
+
+      - name: Start and enable the nginx container
+        systemd:
+            name: nginx
+            enabled: yes
+            state: restarted
+        when: _nginxsystemd.changed
