@@ -3,14 +3,18 @@
   hosts: localhost
   vars:
       websites:
-          mydailybag:
+          mydailybag.com:
               hostname: 'mydailybag.com'
               port: 80
-              backend: 192.168.0.21
-          vidomaintenance:
+              backend: 192.168.0.27
+          vidomaintenance.ca:
               hostname: 'vidomaintenance.ca'
               port: 80
-              backend: 192.168.0.21
+              backend: 192.168.0.27
+          lb00.remote-lab.net:
+              hostname: 'lb00.remote-lab.net'
+              port: 80
+              backend: 192.168.0.27
   tasks:
       - name: Install required packages
         package:
