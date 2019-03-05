@@ -21,3 +21,14 @@ server {
 {% endfor %}
 
 }
+
+stream {
+
+{% for port in websites_ssl.ports %}
+server {
+  listen {{ port }};
+  proxy_pass {{ websites_ssl.backend }}:{{ port }};
+}
+{% endfor %}
+
+}

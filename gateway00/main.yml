@@ -19,18 +19,15 @@
               hostname: 'containers.remote-lab.net'
               port: 80
               backend: 192.168.0.22
-          containers.remote-lab.net-ssl:
-              hostname: 'containers.remote-lab.net'
-              port: 443
-              backend: 192.168.0.22
           containers.remote-lab.net-wildcard:
               hostname: '*.containers.remote-lab.net'
               port: 80
               backend: 192.168.0.22
-          containers.remote-lab.net-wildcard-ssl:
-              hostname: '*.containers.remote-lab.net'
-              port: 443
-              backend: 192.168.0.22
+      websites_ssl:
+          ports:
+              - 443
+              - 8443
+          backend: 192.168.0.22
   tasks:
       - name: Install required packages
         package:
