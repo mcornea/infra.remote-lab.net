@@ -13,6 +13,7 @@ upstream {{ key }} {
 server {
   listen {{ value.port }};
   server_name {{ value.hostname }};
+  proxy_set_header Host $host;
   location / {
     proxy_pass http://{{ key }};
   }
