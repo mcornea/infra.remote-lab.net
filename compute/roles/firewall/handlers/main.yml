@@ -1,6 +1,0 @@
----
-- name: restart shorewall
-  service: name=shorewall state=restarted
-
-- name: restart networking
-  service: name=network.service  state=restarted

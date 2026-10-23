@@ -1,5 +1,0 @@
----
-dependencies:
-  - redis
-  - sensu/common
-  - rabbitmq

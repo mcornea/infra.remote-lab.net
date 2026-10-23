@@ -1,7 +1,0 @@
----
-- name: create document root
-  file:
-    dest: "/var/www/{{ site.1 }}"
-    state: directory
-    owner: apache
-    group: apache

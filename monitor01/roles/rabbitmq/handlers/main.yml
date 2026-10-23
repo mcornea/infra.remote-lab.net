@@ -1,6 +1,0 @@
----
-- name: restart rabbitmq
-  service:
-   name: '{{ rabbitmq_service_name }}'
-   state: restarted
-  when: manage_services|default(false)

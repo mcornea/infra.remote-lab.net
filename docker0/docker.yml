@@ -1,8 +1,0 @@
----
-- name: Set up base configuration
-  hosts: docker0
-  sudo: yes
-
-  roles:
-    - base
-    - docker
