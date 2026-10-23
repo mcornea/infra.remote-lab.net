@@ -31,9 +31,20 @@ jobs:
           ')"
           unset KOMODO_WEBHOOK_SECRET
 
-          curl --fail-with-body --silent --show-error \
+          response_headers="$(mktemp)"
+          trap 'rm -f "$response_headers"' EXIT
+          http_status="$(curl --fail-with-body --silent --show-error \
+            --dump-header "$response_headers" \
+            --output /dev/null \
+            --write-out '%{http_code}' \
             --request POST "$KOMODO_WEBHOOK_URL" \
             --header 'Content-Type: application/json' \
             --header "X-Hub-Signature-256: sha256=$signature" \
             --header 'X-GitHub-Event: push' \
-            --data-binary "$body"
+            --data-binary "$body")"
+          printf 'Komodo response: HTTP %s\n' "$http_status"
+          if [[ "$http_status" =~ ^3 ]]; then
+            redirect_location="$(awk 'tolower($1) == "location:" { sub(/\r$/, "", $2); print $2 }' "$response_headers" | tail -n1)"
+            printf 'Redirect target: %s\n' "${redirect_location:-<missing Location header>}"
+            exit 22
+          fi
