@@ -22,7 +22,7 @@ services:
     restart: always
 
   immich_server:
-    image: ghcr.io/immich-app/immich-server:v3.3.3
+    image: ghcr.io/immich-app/immich-server:v3.3.5
     container_name: immich_server
     volumes:
       - /mnt/nfs/immich/library:/usr/src/app/upload
