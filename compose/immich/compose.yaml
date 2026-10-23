@@ -41,7 +41,7 @@ services:
       - label=disable
 
   immich_machine_learning:
-    image: ghcr.io/immich-app/immich-machine-learning:v3.3.3
+    image: ghcr.io/immich-app/immich-machine-learning:v3.3.5
     container_name: immich-machine-learning
     volumes:
       - /mnt/nfs/immich/model-cache:/cache
