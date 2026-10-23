@@ -1,0 +1,39 @@
+name: Trigger Komodo stack procedure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'compose/**'
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send signed Komodo webhook
+        env:
+          KOMODO_WEBHOOK_URL: ${{ vars.KOMODO_STACK_WEBHOOK_URL }}
+          KOMODO_WEBHOOK_SECRET: ${{ secrets.KOMODO_STACK_WEBHOOK_SECRET }}
+        run: |
+          set -euo pipefail
+          : "${KOMODO_WEBHOOK_URL:?Set the KOMODO_STACK_WEBHOOK_URL repository variable}"
+          : "${KOMODO_WEBHOOK_SECRET:?Set the KOMODO_STACK_WEBHOOK_SECRET repository secret}"
+
+          body='{"ref":"refs/heads/main"}'
+          signature="$(BODY="$body" node -e '
+            const crypto = require("node:crypto");
+            process.stdout.write(
+              crypto.createHmac("sha256", process.env.KOMODO_WEBHOOK_SECRET)
+                .update(process.env.BODY)
+                .digest("hex")
+            );
+          ')"
+          unset KOMODO_WEBHOOK_SECRET
+
+          curl --fail-with-body --silent --show-error \
+            --request POST "$KOMODO_WEBHOOK_URL" \
+            --header 'Content-Type: application/json' \
+            --header "X-Hub-Signature-256: sha256=$signature" \
+            --header 'X-GitHub-Event: push' \
+            --data-binary "$body"
