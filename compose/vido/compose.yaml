@@ -1,0 +1,18 @@
+services:
+  nginx:
+    image: docker.io/library/nginx:alpine
+    container_name: vidomaintenance
+    environment:
+      TZ: Europe/Bucharest
+    volumes:
+      - /mnt/nfs/vidomaintenance.ca:/usr/share/nginx/html:Z
+      - /mnt/nfs/vidomaintenance.ca/deploy/nginx.conf:/etc/nginx/conf.d/default.conf:Z
+    networks:
+      infra-net:
+        ipv4_address: 172.16.1.21
+    mac_address: da:1c:c5:52:40:81
+
+networks:
+  infra-net:
+    external: true
+    name: infra-net
