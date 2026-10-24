@@ -1,0 +1,18 @@
+services:
+  nginx-proxy-manager:
+    image: docker.io/jc21/nginx-proxy-manager:2.16.0
+    container_name: nginx-proxy-manager
+    restart: always
+    environment:
+      TZ: Europe/Bucharest
+    volumes:
+      - /mnt/nfs/nginx-proxy/config.json:/app/config/production.json
+      - /mnt/nfs/nginx-proxy/data:/data
+      - /mnt/nfs/nginx-proxy/letsencrypt:/etc/letsencrypt
+    networks:
+      infra-net:
+        ipv4_address: 172.16.1.19
+networks:
+  infra-net:
+    external: true
+    name: infra-net
