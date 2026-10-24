@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: docker.io/library/nginx:alpine
+    image: docker.io/library/nginx:1.30.6-alpine
     container_name: vidomaintenance
     environment:
       TZ: Europe/Bucharest
