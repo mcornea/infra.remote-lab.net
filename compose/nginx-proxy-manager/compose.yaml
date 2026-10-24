@@ -6,9 +6,9 @@ services:
     environment:
       TZ: Europe/Bucharest
     volumes:
-      - /mnt/nfs/nginx-proxy/config.json:/app/config/production.json
-      - /mnt/nfs/nginx-proxy/data:/data
-      - /mnt/nfs/nginx-proxy/letsencrypt:/etc/letsencrypt
+      - /mnt/nfs/nginx-proxy-manager/config.json:/app/config/production.json
+      - /mnt/nfs/nginx-proxy-manager/data:/data
+      - /mnt/nfs/nginx-proxy-manager/letsencrypt:/etc/letsencrypt
     networks:
       infra-net:
         ipv4_address: 172.16.1.19
