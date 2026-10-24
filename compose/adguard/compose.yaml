@@ -1,0 +1,11 @@
+services:
+  adguard:
+    image: docker.io/adguard/adguardhome:v0.107.61
+    container_name: adguard
+    environment:
+      TZ: Europe/Bucharest
+    volumes:
+      - /mnt/nfs/adguard/adguard/config:/opt/adguardhome/conf
+      - /mnt/nfs/adguard/adguard/data:/opt/adguardhome/work
+    network_mode: host
+    restart: unless-stopped
