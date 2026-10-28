@@ -1,0 +1,19 @@
+services:
+  grafana:
+    image: docker.io/grafana/grafana:12.3.0
+    container_name: grafana
+    volumes:
+      - /mnt/nfs/grafana/grafana/config/grafana.ini:/etc/grafana/grafana.ini
+      - /mnt/nfs/grafana/grafana/data:/var/lib/grafana
+    dns:
+      - 172.16.1.15
+      - 172.16.1.13
+    networks:
+      infra-net:
+        ipv4_address: 172.16.1.26
+    restart: unless-stopped
+
+networks:
+  infra-net:
+    external: true
+    name: infra-net
