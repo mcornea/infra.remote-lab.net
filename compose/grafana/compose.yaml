@@ -1,7 +1,8 @@
 services:
   grafana:
-    image: docker.io/grafana/grafana:12.3.0
+    image: docker.io/grafana/grafana:13.3.0
     container_name: grafana
+    user: root
     volumes:
       - /mnt/nfs/grafana/grafana/config/grafana.ini:/etc/grafana/grafana.ini
       - /mnt/nfs/grafana/grafana/data:/var/lib/grafana
