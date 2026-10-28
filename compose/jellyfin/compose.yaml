@@ -1,6 +1,6 @@
 services:
   jellyfin:
-    image: ghcr.io/jellyfin/jellyfin:12.3
+    image: ghcr.io/jellyfin/jellyfin:12.4
     container_name: jellyfin
     volumes:
       - /mnt/nfs/jellyfin/cache:/cache
