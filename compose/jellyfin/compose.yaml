@@ -1,0 +1,22 @@
+services:
+  jellyfin:
+    image: ghcr.io/jellyfin/jellyfin:12.3
+    container_name: jellyfin
+    volumes:
+      - /mnt/nfs/jellyfin/cache:/cache
+      - /mnt/nfs/jellyfin/config:/config
+      - /mnt/movies:/data
+    networks:
+      infra-net:
+        ipv4_address: 172.16.1.37
+        mac_address: b4:4f:c1:12:77:f1
+    devices:
+      - nvidia.com/gpu=all
+    security_opt:
+      - label=disable
+    restart: unless-stopped
+
+networks:
+  infra-net:
+    external: true
+    name: infra-net
