@@ -1,6 +1,6 @@
 services:
   adguard:
-    image: docker.io/adguard/adguardhome:v0.107.79
+    image: docker.io/adguard/adguardhome:v0.107.80
     container_name: adguard
     environment:
       TZ: Europe/Bucharest
