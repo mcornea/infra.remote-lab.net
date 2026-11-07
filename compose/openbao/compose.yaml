@@ -1,0 +1,23 @@
+services:
+  openbao:
+    image: quay.io/openbao/openbao:2.7.2
+    container_name: openbao
+    command: ["server", "-config=/openbao/config/openbao.hcl"]
+    environment:
+      TZ: Europe/Bucharest
+    mem_swappiness: 0
+    volumes:
+      - /mnt/nfs/openbao/data:/openbao/data
+      - /mnt/nfs/openbao/tls:/openbao/tls:ro
+      - /mnt/nfs/openbao/config/openbao.hcl:/openbao/config/openbao.hcl:ro
+      - /mnt/nfs/openbao/seal/static-seal.key:/openbao/config/static-seal.key:ro,Z
+    networks:
+      infra-net:
+        ipv4_address: 172.16.1.58
+        mac_address: 02:45:14:64:f9:81
+    restart: unless-stopped
+
+networks:
+  infra-net:
+    external: true
+    name: infra-net
