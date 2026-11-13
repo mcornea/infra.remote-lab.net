@@ -1,6 +1,6 @@
 services:
   jellyseer:
-    image: ghcr.io/seerr-team/seerr:v3.5.1
+    image: ghcr.io/seerr-team/seerr:v3.5.2
     container_name: jellyseer
     volumes:
       - /mnt/nfs/jellyseer/config:/app/config
