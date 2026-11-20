@@ -1,6 +1,6 @@
 services:
   openbao:
-    image: quay.io/openbao/openbao:2.7.2
+    image: quay.io/openbao/openbao:2.7.3
     container_name: openbao
     command: ["server", "-config=/openbao/config/openbao.hcl"]
     environment:
